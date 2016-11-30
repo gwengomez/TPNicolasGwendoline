@@ -38,7 +38,7 @@ services.factory('Connection', ['$http', 'Config', function ($http, Config) {
 
     }]);
 
-services.factory('Oeuvre', ['$http', 'Config', function ($http, Config) {
+services.factory('Oeuvres', ['$http', 'Config', function ($http, Config) {
         var self = this;
         
         function lister() {
@@ -46,8 +46,23 @@ services.factory('Oeuvre', ['$http', 'Config', function ($http, Config) {
             return $http.get(url);
         }
         
-        var oeuvre = {
+        var oeuvres = {
             lister: lister
+        };
+        
+        return oeuvres;
+}]);
+
+services.factory('Oeuvre', ['$http', 'Config', function ($http, Config) {
+        var self = this;
+        
+        function getOeuvre(id) {
+            var url = Config.urlServer + Config.urlGetOeuvre + id;
+            return $http.get(url);
+        }
+        
+        var oeuvre = {
+            getOeuvre: getOeuvre
         };
         
         return oeuvre;

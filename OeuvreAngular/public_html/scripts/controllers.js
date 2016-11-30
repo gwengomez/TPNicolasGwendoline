@@ -18,7 +18,7 @@ controllers.controller('MainCtrl', ['Connection', '$location', function (Connect
          */
         function disConnect() {
             Connection.setConnected(false);
-            $location.path('/home');
+            $location.path('/connect');
         }
         
         this.isConnected = function isConnected() {
@@ -51,11 +51,44 @@ controllers.controller('ConnectionCtrl', ['Connection', '$location', function (C
         }
     }]);
 
-controllers.controller('OeuvreCtrl', ['Connection', '$location', 'Oeuvre', function (Connection, $location, Oeuvre) {
-        var oeuvreCtrl = this;
-        
-        Oeuvre.lister().success(function (oeuvres) {
-            oeuvreCtrl.oeuvres = oeuvres;
+controllers.controller('OeuvresCtrl', ['Oeuvres', function (Oeuvres) {
+        var oeuvresCtrl = this;
+        var oeuvresPromise = Oeuvres.lister();
+        oeuvresPromise.success(function (data) {
+            if (data.length > 0) {
+                oeuvresCtrl.oeuvres = data;
+            }
+        }).error(function (data) {
+            oeuvresCtrl.error = data;
+            alert(oeuvresCtrl.error);
         });
-        $location.path('/catalogue.html');
+        
+        
+    }]);
+
+controllers.controller('OeuvreCtrl', ['Oeuvre', '$routeParams', function (Oeuvre, $routeParams) {
+        var oeuvreCtrl = this;
+        oeuvreCtrl.oeuvreId = $routeParams.id;
+        if (oeuvreCtrl.oeuvreId)
+            oeuvreCtrl.pageTitle = 'Modification';
+        else
+            oeuvreCtrl.pageTitle = 'Ajout';
+        oeuvreCtrl.pageTitle += " d'une oeuvre";
+        
+        if (oeuvreCtrl.oeuvreId > 0) {
+            var oeuvrePromise = Oeuvre.getOeuvre($routeParams.id);
+            oeuvrePromise.success(function (data, status) {
+                if (status == 200) {
+                    oeuvreCtrl.oeuvre = data;
+                }
+            }).error(function (data) {
+                oeuvreCtrl.error = data;
+                alert(oeuvreCtrl.error);
+            });
+        }
+        
+        // On a cliqué sur le bouton Annuler
+        function cancel() {
+            $location.path('/getEmployees');
+        }
     }]);

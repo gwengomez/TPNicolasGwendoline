@@ -15,7 +15,10 @@ app.config(['$routeProvider',
             templateUrl: 'partials/home.html', controller: 'MainCtrl as mainCtrl'
         })
         .when('/lister', {
-            templateUrl: 'partials/catalogue.html', controller: 'OeuvreCtrl as oeuvreCtrl'
+            templateUrl: 'partials/catalogue.html', controller: 'OeuvresCtrl as oeuvresCtrl'
+        })
+        .when('/oeuvre/:id', {
+            templateUrl: 'partials/oeuvre.html', controller: 'OeuvreCtrl as oeuvreCtrl'
         })
         .otherwise({
             redirectTo: 'partials/home.html'

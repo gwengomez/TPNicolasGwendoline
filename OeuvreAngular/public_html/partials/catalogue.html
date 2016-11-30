@@ -14,13 +14,13 @@
         </thead>
         <tbody>
             
-            <tr ng-repeat='oeuvre in oeuvreCtrl.oeuvres'>
+            <tr ng-repeat='oeuvre in oeuvresCtrl.oeuvres'>
                 <td>{{oeuvre.titre}}</td>
                 <td>{{oeuvre.prix}}</td>
-                <td>{{oeuvre.proprietaire.prenomProprietaire}}</td>
-                <td>{{oeuvre.proprietaire.nomProprietaire}}</td>
+                <td>{{oeuvre.proprietaire.prenom_proprietaire}}</td>
+                <td>{{oeuvre.proprietaire.nom_proprietaire}}</td>
                 <td><a class="btn btn-primary" href="#">Réserver</a></td>
-                <td><a class="btn btn-primary" href="#">Modifier</a></td> 
+                <td><a class="btn btn-primary" href="#/oeuvre/{{oeuvre.id_oeuvre}}">Modifier</a></td> 
                 <td><a class="btn btn-primary" onclick="javascript:if (confirm('Suppression confirmée ?')){ window.location='#}';}">Supprimer</a></td>                     
             </tr>
         </tbody>
