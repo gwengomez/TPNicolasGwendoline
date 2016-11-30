@@ -61,12 +61,46 @@ services.factory('Oeuvre', ['$http', 'Config', function ($http, Config) {
             return $http.get(url);
         }
         
+        function updateOeuvre(oeuvre) {
+            var url = Config.urlServer + Config.urlModifierOeuvre;
+            return $http.post(url, oeuvre);
+        }
+        
+        function addOeuvre(oeuvre) {
+            var url = Config.urlServer + Config.urlAjouterOeuvre;
+            return $http.post(url, oeuvre);
+        }
+        
+        function deleteOeuvre(id) {
+            var url = Config.urlServer + Config.urlSupprimerOeuvre + id;
+            return $http.get(url);
+        }
+        
         var oeuvre = {
-            getOeuvre: getOeuvre
+            getOeuvre: getOeuvre,
+            updateOeuvre: updateOeuvre,
+            addOeuvre: addOeuvre,
+            deleteOeuvre: deleteOeuvre
         };
         
         return oeuvre;
 }]);
+
+services.factory('Proprietaires', ['$http', 'Config', function ($http, Config) {
+        var self = this;
+        
+        function getProprietaires() {
+            var url = Config.urlServer + Config.urlGetProprietaires;
+            return $http.get(url);
+        }
+        
+        var proprietaires = {
+            getProprietaires: getProprietaires
+        };
+        
+        return proprietaires;
+}]);
+
 /**
  * Définition des urls
  */
@@ -80,7 +114,7 @@ services.factory('Config', [function () {
             urlGetProprietaires: '/getProprietaires',
             urlGetReservations: '/getReservations',
             urlGetAdherents: '/getAdherents',
-            urlGetConnecter: '/getConnecter/',
+            urlGetConnecter: '/getConnexion/',
             urlAjouterOeuvre: '/ajouterOeuvre',
             urlModifierOeuvre: '/modifierOeuvre',
             urlModifierProprietaire: '/modifierProprietaire',

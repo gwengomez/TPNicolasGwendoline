@@ -21,7 +21,9 @@
                 <td>{{oeuvre.proprietaire.nom_proprietaire}}</td>
                 <td><a class="btn btn-primary" href="#">Réserver</a></td>
                 <td><a class="btn btn-primary" href="#/oeuvre/{{oeuvre.id_oeuvre}}">Modifier</a></td> 
-                <td><a class="btn btn-primary" onclick="javascript:if (confirm('Suppression confirmée ?')){ window.location='#}';}">Supprimer</a></td>                     
+                <td><a class="btn btn-primary"
+                        confirmed-click="oeuvresCtrl.deleteOeuvre(oeuvre.id_oeuvre)"
+                        ng-confirm-box-click="Confirmer la suppression ?">Supprimer</a></td>
             </tr>
         </tbody>
     </table>          

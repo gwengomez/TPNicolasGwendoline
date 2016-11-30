@@ -1,6 +1,6 @@
 'use strict';
 
-var app = angular.module('app', ['ngRoute', 'ngAnimate', 'ui.bootstrap', 'controllers', 'services']);
+var app = angular.module('app', ['ngRoute', 'ngAnimate', 'ui.bootstrap', 'controllers', 'directives', 'services']);
 
 app.config(['$routeProvider',
     function ($routeProvider) {
@@ -18,6 +18,9 @@ app.config(['$routeProvider',
             templateUrl: 'partials/catalogue.html', controller: 'OeuvresCtrl as oeuvresCtrl'
         })
         .when('/oeuvre/:id', {
+            templateUrl: 'partials/oeuvre.html', controller: 'OeuvreCtrl as oeuvreCtrl'
+        })
+        .when('/ajouterOeuvre', {
             templateUrl: 'partials/oeuvre.html', controller: 'OeuvreCtrl as oeuvreCtrl'
         })
         .otherwise({
