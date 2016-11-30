@@ -14,6 +14,9 @@ app.config(['$routeProvider',
         .when('/disconnect', {
             templateUrl: 'partials/home.html', controller: 'MainCtrl as mainCtrl'
         })
+        .when('/lister', {
+            templateUrl: 'partials/catalogue.html', controller: 'OeuvreCtrl as oeuvreCtrl'
+        })
         .otherwise({
             redirectTo: 'partials/home.html'
         });
