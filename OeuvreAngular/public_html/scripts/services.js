@@ -21,11 +21,12 @@ services.factory('Connection', ['$http', 'Config', function ($http, Config) {
         // et retourne true ou false
         function getConnection(login, pwd) {
             var url = Config.urlServer + Config.urlGetConnecter + login;
-            return $http.get(url).success(function(proprietaire) {
+            return $http.get(url);
+            /*return $http.get(url).success(function(proprietaire) {
                 if (proprietaire && proprietaire.pwd === pwd) {
                     connected = true;
                 }
-            });
+            });*/
         }
         
         var connection = {
@@ -37,6 +38,27 @@ services.factory('Connection', ['$http', 'Config', function ($http, Config) {
         return connection;
 
     }]);
+
+services.factory('User', ['$http', 'Config', function ($http, Config) {
+        var self = this;
+        
+        function ajouterUser(user) {
+            var url = Config.urlServer + Config.urlAjouterProprietaire;
+            return $http.post(url, user);
+        }
+        
+        function modifierUser(user) {
+            var url = Config.urlServer + Config.urlModifierProprietaire;
+            return $http.post(url, user);
+        }
+        
+        var user = {
+            ajouterUser: ajouterUser,
+            modifierUser: modifierUser
+        };
+        
+        return user;
+}]);
 
 services.factory('Oeuvres', ['$http', 'Config', function ($http, Config) {
         var self = this;

@@ -21,6 +21,7 @@
                 <li><a href="#/reservations">Réservations</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
+                <li ng-show='mainCtrl.isConnected()'><a href="#/profil">Profil</a></li>
                 <li ng-show='!(mainCtrl.isConnected())'><a href="#/connect">Se connecter</a></li>
                 <li ng-show='mainCtrl.isConnected()'><a href="" ng-click='mainCtrl.disConnect()'>Se déconnecter</a></li>
             </ul>

@@ -5,7 +5,7 @@
  */
 var controllers = angular.module('controllers', []);
 
-controllers.controller('MainCtrl', ['Connection', '$location', function (Connection, $location) {
+controllers.controller('MainCtrl', ['Connection', '$location', '$cookieStore', function (Connection, $location, $cookieStore) {
         var mainCtrl = this;
         // On référence les méthodes exposées
         mainCtrl.disConnect = disConnect;
@@ -17,16 +17,21 @@ controllers.controller('MainCtrl', ['Connection', '$location', function (Connect
          * On recharge la page principale
          */
         function disConnect() {
-            Connection.setConnected(false);
+            //Connection.setConnected(false);
+            $cookieStore.put('user', null);
             $location.path('/connect');
         }
         
         this.isConnected = function isConnected() {
-            return Connection.isConnected();
-        }
+            if ($cookieStore.get('user') !== null)
+                return true;
+            else
+                return false;
+            //return Connection.isConnected();
+        };
     }]);
 
-controllers.controller('ConnectionCtrl', ['Connection', '$location', function (Connection, $location) {
+controllers.controller('ConnectionCtrl', ['Connection', '$location', '$cookieStore', function (Connection, $location, $cookieStore) {
         var connectionCtrl = this;
         // On référence les méthodes exposées
         connectionCtrl.signIn = signIn;
@@ -42,12 +47,68 @@ controllers.controller('ConnectionCtrl', ['Connection', '$location', function (C
         function signIn(login, pwd) {
             connectionCtrl.error = "";
             Connection.getConnection(login, pwd).success(function (proprietaire) {
-                if (Connection.isConnected()) {
+                if (proprietaire && proprietaire.pwd === pwd) {
+                    $cookieStore.put('user', proprietaire);
                     $location.path('/home');
                 }
             }).error(function (error) {
                 connectionCtrl.error = "Erreur de login ou de mot de passe";
             });
+        }
+    }]);
+
+controllers.controller('UserCtrl', ['Connection', 'User', '$location', '$cookieStore', function (Connection, User, $location, $cookieStore) {
+        var userCtrl = this;
+        // On référence les méthodes exposées
+        userCtrl.editUser = editUser;
+        
+        userCtrl.user = $cookieStore.get('user');
+        
+        if (userCtrl.user)
+            userCtrl.pageTitle = 'Modification du ';
+        else
+            userCtrl.pageTitle = "Ajout d'un ";
+        userCtrl.pageTitle += "compte";
+
+        /**
+         * Met à jour un utilisateur
+         * Le crée s'il n'existe pas
+         */
+        function editUser() {
+            if (!userCtrl.user.id_proprietaire)
+                userCtrl.user.id_proprietaire = parseInt(0);
+            if (userCtrl.user.id_proprietaire > 0) {
+                User.modifierUser(userCtrl.user).success(function (data, status) {
+                        // Si c'est OK on consulte la nouvelle liste des oeuvres
+                        // Sinon on affiche l'erreur
+                        if (status === 200) {
+                            $cookieStore.put('user', userCtrl.user);
+                            $location.path('/profil');
+                            userCtrl.succes = "Votre compte a bien été modifié !";
+                        }
+                    }).error(function (data) {
+                        userCtrl.error = data.message;
+                        alert(userCtrl.error);
+                    });
+            } else {
+                User.ajouterUser(userCtrl.user).success(function (data, status) {
+                        // Si c'est OK on consulte la nouvelle liste des oeuvres
+                        // Sinon on affiche l'erreur
+                        if (status === 200) {
+                            Connection.getConnection(userCtrl.user.login, userCtrl.user.pwd).success(function (proprietaire) {
+                                if (proprietaire && proprietaire.pwd === userCtrl.user.pwd) {
+                                    $cookieStore.put('user', proprietaire);
+                                    $location.path('/home');
+                                }
+                            }).error(function (error) {
+                                userCtrl.error = "Erreur de login ou de mot de passe";
+                            });
+                        }
+                    }).error(function (data) {
+                        userCtrl.error = data.message;
+                        alert(userCtrl.error);
+                    });
+            }
         }
     }]);
 
@@ -86,7 +147,7 @@ controllers.controller('OeuvresCtrl', ['Oeuvres', 'Oeuvre', '$location', '$route
         
     }]);
 
-controllers.controller('OeuvreCtrl', ['Oeuvre', 'Proprietaires', '$routeParams', '$location', function (Oeuvre, Proprietaires, $routeParams, $location) {
+controllers.controller('OeuvreCtrl', ['Oeuvre', 'Proprietaires', '$routeParams', '$location', '$route', function (Oeuvre, Proprietaires, $routeParams, $location, $route) {
         var oeuvreCtrl = this;
         oeuvreCtrl.oeuvreId = $routeParams.id;
         if (oeuvreCtrl.oeuvreId)
@@ -135,37 +196,45 @@ controllers.controller('OeuvreCtrl', ['Oeuvre', 'Proprietaires', '$routeParams',
                 // Récupération du proprietaire sélectionné
                 oeuvre.proprietaire = oeuvreCtrl.selectedOptionProprietaire;
                 oeuvre.id_proprietaire = parseInt(oeuvre.proprietaire.id_proprietaire);
-                oeuvre.id_oeuvre = parseInt(id);
+                if (oeuvre.id_oeuvre)
+                    oeuvre.id_oeuvre = parseInt(id);
+                else
+                    oeuvre.id_oeuvre = parseInt(0);
                 
                 // Convertion du prix en double
-                oeuvre.prix = parseFloat(oeuvre.prix);
-                
-                // si on a un id => c'est une modification
-                if (id) {
-                    // Demande de mise à jour de l'oeuvre
-                    Oeuvre.updateOeuvre(oeuvre).success(function (data, status) {
-                        // Si c'est OK on consulte la nouvelle liste des oeuvres
-                        // Sinon on affiche l'erreur
-                        if (status === 200) {
-                            $location.path('/lister');
-                        }
-                    }).error(function (data) {
-                        oeuvreCtrl.error = data.message;
-                        alert(oeuvreCtrl.error);
-                    });
-                // Sinon c'est la création d'une nouvelle oeuvre
+                if (isNaN(parseFloat(oeuvre.prix))) {
+                    oeuvreCtrl.error = "Veuillez saisir un nombre.";
                 } else {
-                    // Demande d'ajout de l'oeuvre
-                    Oeuvre.addOeuvre(oeuvre).success(function (data, status) {
-                        // Si c'est OK on consulte la nouvelle liste des oeuvres
-                        // Sinon on affiche l'erreur
-                        if (status === 200) {
-                            $location.path('/lister');
-                        }
-                    }).error(function (data) {
-                        oeuvreCtrl.error = data.message;
-                        alert(oeuvreCtrl.error);
-                    });
+                    oeuvre.prix = parseFloat(oeuvre.prix);
+                
+                
+                    // si on a un id => c'est une modification
+                    if (id) {
+                        // Demande de mise à jour de l'oeuvre
+                        Oeuvre.updateOeuvre(oeuvre).success(function (data, status) {
+                            // Si c'est OK on consulte la nouvelle liste des oeuvres
+                            // Sinon on affiche l'erreur
+                            if (status === 200) {
+                                $location.path('/lister');
+                            }
+                        }).error(function (data) {
+                            oeuvreCtrl.error = data.message;
+                            alert(oeuvreCtrl.error);
+                        });
+                    // Sinon c'est la création d'une nouvelle oeuvre
+                    } else {
+                        // Demande d'ajout de l'oeuvre
+                        Oeuvre.addOeuvre(oeuvre).success(function (data, status) {
+                            // Si c'est OK on consulte la nouvelle liste des oeuvres
+                            // Sinon on affiche l'erreur
+                            if (status === 200) {
+                                $location.path('/lister');
+                            }
+                        }).error(function (data) {
+                            oeuvreCtrl.error = data.message;
+                            alert(oeuvreCtrl.error);
+                        });
+                    }
                 }
             } else { // On affiche un message d'erreur type
                 oeuvreCtrl.error = "Erreur dans l'enregistrement de l'oeuvre";

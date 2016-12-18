@@ -1,6 +1,6 @@
 'use strict';
 
-var app = angular.module('app', ['ngRoute', 'ngAnimate', 'ui.bootstrap', 'controllers', 'directives', 'services']);
+var app = angular.module('app', ['ngRoute', 'ngAnimate', 'ui.bootstrap', 'controllers', 'directives', 'services', 'ngCookies']);
 
 app.config(['$routeProvider',
     function ($routeProvider) {
@@ -28,6 +28,9 @@ app.config(['$routeProvider',
         })
         .when('/reservation/:id', {
             templateUrl: 'partials/reservation.html', controller: 'ReservationCtrl as reservationCtrl'
+        })
+        .when('/profil', {
+            templateUrl: 'partials/profil.html', controller: 'UserCtrl as userCtrl'
         })
         .otherwise({
             redirectTo: 'partials/home.html'
