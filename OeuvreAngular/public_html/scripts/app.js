@@ -23,6 +23,12 @@ app.config(['$routeProvider',
         .when('/ajouterOeuvre', {
             templateUrl: 'partials/oeuvre.html', controller: 'OeuvreCtrl as oeuvreCtrl'
         })
+        .when('/reservations', {
+            templateUrl: 'partials/reservations.html', controller: 'ReservationsCtrl as reservationsCtrl'
+        })
+        .when('/reservation/:id', {
+            templateUrl: 'partials/reservation.html', controller: 'ReservationCtrl as reservationCtrl'
+        })
         .otherwise({
             redirectTo: 'partials/home.html'
         });

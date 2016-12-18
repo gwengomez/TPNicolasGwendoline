@@ -101,6 +101,66 @@ services.factory('Proprietaires', ['$http', 'Config', function ($http, Config) {
         return proprietaires;
 }]);
 
+services.factory('Reservations', ['$http', 'Config', function ($http, Config) {
+        var self = this;
+        
+        function getReservations() {
+            var url = Config.urlServer + Config.urlGetReservations;
+            return $http.get(url);
+        }
+        
+        var reservations = {
+            getReservations: getReservations
+        };
+        return reservations;
+}]);
+
+services.factory('Reservation', ['$http', 'Config', function ($http, Config) {
+        var self = this;
+        
+        function getReservation(id) {
+            var url = Config.urlServer + Config.urlGetReservation + id;
+            return $http.get(url);
+        }
+        
+        function addReservation(reservation) {
+            var url = Config.urlServer + Config.urlAjouterReservation;
+            return $http.post(url, reservation);
+        }
+        
+        function confirmerReservation(id_oeuvre, date) {
+            var url = Config.urlServer + Config.urlConfirmerReservation + id_oeuvre + "-" + date;
+            return $http.get(url);
+        }
+        
+        function deleteReservation(id_oeuvre, date) {
+            var url = Config.urlServer + Config.urlSupprimerReservation + id_oeuvre + "-" + date;
+            return $http.get(url);
+        }
+        
+        var reservations = {
+            getReservation: getReservation,
+            addReservation: addReservation,
+            confirmerReservation: confirmerReservation,
+            deleteReservation: deleteReservation
+        };
+        return reservations;
+}]);
+
+services.factory('Adherents', ['$http', 'Config', function ($http, Config) {
+        var self = this;
+        
+        function getAdherents() {
+            var url = Config.urlServer + Config.urlGetAdherents;
+            return $http.get(url);
+        }
+        
+        var adherents = {
+            getAdherents: getAdherents
+        };
+        return adherents;
+}]);
+
 /**
  * Définition des urls
  */

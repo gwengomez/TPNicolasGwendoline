@@ -66,8 +66,8 @@ controllers.controller('OeuvresCtrl', ['Oeuvres', 'Oeuvre', '$location', '$route
         });
         
         /**
-        * Suppression d'un employé
-        * @param {type} id de l'employé à supprimer
+        * Suppression d'une oeuvre
+        * @param {type} id de l'oeuvre à supprimer
         */
         function deleteOeuvre(id) {
             if (id) {
@@ -135,7 +135,7 @@ controllers.controller('OeuvreCtrl', ['Oeuvre', 'Proprietaires', '$routeParams',
                 // Récupération du proprietaire sélectionné
                 oeuvre.proprietaire = oeuvreCtrl.selectedOptionProprietaire;
                 oeuvre.id_proprietaire = parseInt(oeuvre.proprietaire.id_proprietaire);
-                oeuvre.id_oeuvre = parseInt(0);
+                oeuvre.id_oeuvre = parseInt(id);
                 
                 // Convertion du prix en double
                 oeuvre.prix = parseFloat(oeuvre.prix);
@@ -171,5 +171,121 @@ controllers.controller('OeuvreCtrl', ['Oeuvre', 'Proprietaires', '$routeParams',
                 oeuvreCtrl.error = "Erreur dans l'enregistrement de l'oeuvre";
             }
             
+        }
+    }]);
+
+controllers.controller('ReservationsCtrl', ['Reservations', 'Reservation', '$route', '$location', function (Reservations, Reservation, $route, $location) {
+        var reservationsCtrl = this;
+        var reservationsPromise = Reservations.getReservations();
+        reservationsCtrl.deleteReservation = deleteReservation;
+        reservationsCtrl.confirmerReservation = confirmerReservation;
+        
+        reservationsPromise.success(function (data) {
+            if (data.length > 0) {
+                reservationsCtrl.reservations = data;
+            }
+        }).error(function (data) {
+            reservationsCtrl.error = data;
+            alert(reservationsCtrl.error);
+        });
+        
+        function confirmerReservation(id_oeuvre, date) {
+            if (id_oeuvre && date) {
+                Reservation.confirmerReservation(id_oeuvre, date).success(function (data, status) {
+                    if (status == 200) {
+                        $location.path('/reservations');
+                        $route.reload();
+                    }
+                }).error(function (data) {
+                    reservationsCtrl.error = data;
+                    alert(reservationsCtrl.error);
+                });
+            }
+        }
+        
+        /**
+        * Suppression d'une reservation
+        * @param {type} id de la reservation à supprimer
+        */
+        function deleteReservation(id_oeuvre, date) {
+            if (id_oeuvre && date) {
+                Reservation.deleteReservation(id_oeuvre, date).success(function (data, status) {
+                    if (status == 200) {
+                        $location.path('/reservations');
+                        $route.reload();
+                    }
+                }).error(function (data) {
+                    reservationsCtrl.error = data;
+                    alert(reservationsCtrl.error);
+                });
+            }
+        }
+    }]);
+
+controllers.controller('ReservationCtrl', ['Oeuvre', 'Adherents', 'Reservation', '$routeParams', '$location', function (Oeuvre, Adherents, Reservation, $routeParams, $location) {
+        var reservationCtrl = this;
+        reservationCtrl.datePickerOpened = false;
+        reservationCtrl.openDatePicker = function () {
+            reservationCtrl.datePickerOpened = true;
+        };
+        reservationCtrl.oeuvreId = $routeParams.id;
+        
+        reservationCtrl.cancel = cancel;
+        reservationCtrl.ajouterReservation = ajouterReservation;
+        
+        // Récupère la liste des reservations
+        Adherents.getAdherents().success(function (data) {
+            reservationCtrl.adherents = data;
+            reservationCtrl.selectedOptionAdherent = reservationCtrl.adherents;
+        }).error(function (data) {
+            reservationCtrl.error = data;
+            alert(reservationCtrl.error);
+        });
+        
+        var reservationPromise = Oeuvre.getOeuvre($routeParams.id);
+        reservationPromise.success(function (data, status) {
+            if (status == 200) {
+                reservationCtrl.oeuvre = data
+            }
+        }).error(function (data) {
+            reservationCtrl.error = data;
+            alert(reservationCtrl.error);
+        });
+        
+        // On a cliqué sur le bouton Annuler
+        function cancel() {
+            $location.path('/reservations');
+        }
+        
+        /**
+         * On a cliqué sur le bouton valider
+         * @param {type} id : id de l'oeuvre a reserver
+         * @param {type} form : le formulaire complet
+         */
+        function ajouterReservation(id, form) {
+            // Si tout a été saisi, pas de zone oubliée
+            if (form.$valid) {
+                // On récupère l'objet oeuvre dans le scope de la vue
+                var oeuvre = reservationCtrl.oeuvre;
+                var reservation = reservationCtrl.reservation;
+                var adherent = reservationCtrl.selectedOptionAdherent;
+                reservation.id_adherent = adherent.id_adherent;
+                reservation.id_oeuvre = oeuvre.id_oeuvre;
+                // On récupère la date au format MySql
+                reservation.date_reservation = new Date(reservationCtrl.reservation.date_reservation.toString());
+                // Création d'une nouvelle reservation
+                Reservation.addReservation(reservation).success(function (data, status) {
+                    // Si c'est OK on consulte la nouvelle liste des reservations
+                    // Sinon on affiche l'erreur
+                    if (status === 200) {
+                        $location.path('/reservations');
+                    }
+                }).error(function (data) {
+                    reservationCtrl.error = data;
+                    alert(reservationCtrl.error);
+                });
+            } else { // On affiche un message d'erreur type
+                reservationCtrl.error = "Erreur durant la validation du formulaire";
+            }
         }
     }]);
